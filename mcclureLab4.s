@@ -10,7 +10,7 @@
 
 @ The comments below are to assemble, link, run, and debug the program
 @ as -o mcclureLab4.o mcclureLab4.s
-@ gcc -o mcclureLab4 mcclureLab4.o 
+@ gcc -o mcclureLab4 mcclureLab4.o -lwiringPi
 @ ./mcclureLab4
 @ gdb --args ./mcclureLab4
 
@@ -23,9 +23,9 @@ YELLOW = 4 @ Pin number from wiringPi for yellow led
 GREEN  = 3 @ Pin number from wiringPi for green led
 BLUE   = 2 @ Pin number from wiringPi for blue led
 
-.text
 .equ READERROR, 0
 .global main 
+.text
 
 main: 
 
@@ -70,7 +70,7 @@ turnOn:
     mov r1, #ON
     bl digitalWrite
 
-    ldr r0, delayMs
+    ldr r0, =delayMs
     ldr r0, [r0]
     bl delay
 
@@ -233,39 +233,39 @@ lowWater:
 @**********
 
     push {lr} @ Push the link register to the stack
-    ldr r0, red_LED
+    ldr r0, =red_LED
     ldr r0, [r0]
     mov r1, #OFF
     bl digitalWrite
 
-    ldr r0, delayMs
+    ldr r0, =delayMs
     ldr r0, [r0]
     bl delay
 
-    ldr r0, red_LED
+    ldr r0, =red_LED
     ldr r0, [r0]
     mov r1, #ON
     bl digitalWrite
 
-    ldr r0, delayMs
+    ldr r0, =delayMs
     ldr r0, [r0]
     bl delay
 
-    ldr r0, red_LED
+    ldr r0, =red_LED
     ldr r0, [r0]
     mov r1, #OFF
     bl digitalWrite
 
-    ldr r0, delayMs
+    ldr r0, =delayMs
     ldr r0, [r0]
     bl delay
 
-    ldr r0, red_LED
+    ldr r0, =red_LED
     ldr r0, [r0]
     mov r1, #ON
     bl digitalWrite
 
-    ldr r0, delayMs
+    ldr r0, =delayMs
     ldr r0, [r0]
     bl delay
 
@@ -276,7 +276,7 @@ lowWater:
 exit:
 @**********
 
-    ldr r0, red_LED
+    ldr r0, =red_LED
     ldr r0, [r0]
     mov r1, #OFF
     bl digitalWrite
@@ -381,6 +381,8 @@ green_LED  : .word GREEN
 yellow_LED : .word YELLOW
 red_LED    : .word RED
 
+delayMs: .word 1000
+
 .balign 4
 smallDelayMs: .word 6000
 
@@ -389,9 +391,6 @@ mediumDelayMs: .word 8000
 
 .balign 4
 largeDelayMs: .word 10000
-
-.balign 4
-delayMs: .word 1000
 
 .balign 4
 prompt1: .asciz "Welcome to the Coffee Maker \n"
