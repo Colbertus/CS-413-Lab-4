@@ -29,6 +29,11 @@ BLUE   = 2 @ Pin number from wiringPi for blue led
 
 main: 
 
+bl wiringPiSetup
+mov r1, #-1
+cmp r0, r1
+bne init  @ Everything is OK so continue with code.
+
 @ This label is for initializing the GPIO pins
 @**********
 init:
@@ -118,22 +123,22 @@ chooseSize:
     bl scanf @ Call scanf to get the input from the user
 
     ldr r1, =cupInput @ Load the cupInput into r1
-    ldr r5, [r1] @ Load the value of cupInput into r5
+    ldr r11, [r1] @ Load the value of cupInput into r11
 
-    cmp r5, #33 @ Compare r5 with the secret character '!'
-    bleq secretCode @ Branch to secretCode if r5 is less than or equal to 33
+    cmp r11, #33 @ Compare r11 with the secret character '!'
+    bleq secretCode @ Branch to secretCode if r11 is less than or equal to 33
 
-    cmp r5, #115 @ Compare r5 with the character 's'
-    beq checkWater @ Branch to checkWater if r5 is equal to 's'
+    cmp r11, #115 @ Compare r11 with the character 's'
+    beq checkWater @ Branch to checkWater if r11 is equal to 's'
 
-    cmp r5, #109 @ Compare r5 with the character 'm'
-    beq checkWater @ Branch to checkWater if r5 is equal to 'm'
+    cmp r11, #109 @ Compare r11 with the character 'm'
+    beq checkWater @ Branch to checkWater if r11 is equal to 'm'
 
-    cmp r5, #108 @ Compare r5 with the character 'l'
-    beq checkWater @ Branch to checkWater if r5 is equal to 'l'
+    cmp r11, #108 @ Compare r11 with the character 'l'
+    beq checkWater @ Branch to checkWater if r11 is equal to 'l'
 
-    cmp r5, #84 @ Compare r5 with the character 'T'
-    beq exit @ Branch to exit if r5 is equal to 'T'
+    cmp r11, #84 @ Compare r11 with the character 'T'
+    beq exit @ Branch to exit if r11 is equal to 'T'
 
     b chooseSize @ Branch to chooseSize if secret character or any other character is entered
 
@@ -142,26 +147,26 @@ chooseSize:
 checkWater:
 @**********
 
-    cmp r5, #115 @ Compare r5 and 115
-    moveq r6, #6 @ If r5 is equal to 1, move 6 into r5
+    cmp r11, #115 @ Compare r11 and 115
+    moveq r6, #6 @ If r11 is equal to 1, move 6 into r6
 
-    cmp r5, #115 @ Compare r5 and 115
-    addeq r7, r7, #1 @ If r5 is equal to 1, add 1 to r7
+    cmp r11, #115 @ Compare r11 and 115
+    addeq r7, r7, #1 @ If r11 is equal to 1, add 1 to r7
 
-    cmp r5, #109 @ Compare r5 and 109
-    moveq r6, #8 @ If r5 is equal to 2, move 8 into r5
+    cmp r11, #109 @ Compare r11 and 109
+    moveq r6, #8 @ If r11 is equal to 109, move 8 into r6
 
-    cmp r5, #109 @ Compare r5 and 109
-    addeq r8, r8, #1 @ If r5 is equal to 2, add 1 to r8
+    cmp r11, #109 @ Compare r11 and 109
+    addeq r8, r8, #1 @ If r11 is equal to 109, add 1 to r8
 
-    cmp r5, #108 @ Compare r5 and 108
-    moveq r6, #10 @ If r5 is equal to 3, move 10 into r5
+    cmp r11, #108 @ Compare r11 and 108
+    moveq r6, #10 @ If r11 is equal to 108, move 10 into r6
 
-    cmp r5, #108 @ Compare r5 and 108
-    addeq r9, r9, #1 @ If r5 is equal to 3, add 1 to r9
+    cmp r11, #108 @ Compare r11 and 108
+    addeq r9, r9, #1 @ If r11 is equal to 3, add 1 to r9
 
     cmp r4, r6 @ Compare r4 and r6
-    bge brewPrep @ Branch to brewCoffee if r4 is greater than or equal to r5
+    bge brewPrep @ Branch to brewCoffee if r4 is greater than or equal to r6
 
     ldr r0, =brewBad @ Load the brewBad prompt into r0
     bl printf @ Call printf to print the prompt
@@ -203,14 +208,14 @@ brewCoffee:
 
     subs r4, r4, r6 @ Subtract r6 from r4
 
-    cmp r5, #115 @ Compare r5 with the character 's'
-    bleq brewSmall @ Branch to brewSmall if r5 is equal to 's'
+    cmp r11, #115 @ Compare r11 with the character 's'
+    bleq brewSmall @ Branch to brewSmall if r11 is equal to 's'
 
-    cmp r5, #109 @ Compare r5 with the character 'm'
-    bleq brewMedium @ Branch to brewMedium if r5 is equal to 'm'
+    cmp r11, #109 @ Compare r11 with the character 'm'
+    bleq brewMedium @ Branch to brewMedium if r11 is equal to 'm'
 
-    cmp r5, #108 @ Compare r5 with the character 'l'
-    bleq brewLarge @ Branch to brewLarge if r5 is equal to 'l'
+    cmp r11, #108 @ Compare r11 with the character 'l'
+    bleq brewLarge @ Branch to brewLarge if r11 is equal to 'l'
 
     ldr r0, =brewSuccess @ Load the brewSuccess prompt into r0
     bl printf @ Call printf to print the prompt
@@ -233,53 +238,68 @@ lowWater:
 @**********
 
     push {lr} @ Push the link register to the stack
-    ldr r0, =red_LED
-    ldr r0, [r0]
-    mov r1, #OFF
-    bl digitalWrite
+    ldr r0, =red_LED @ Load the red_LED into r0
+    ldr r0, [r0] @ Load the value of red_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the red LED
 
-    ldr r0, =delayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =delayMs @ Load the delayMs into r0
+    ldr r0, [r0] @ Load the value of delayMs into r0
+    bl delay @ Call delay to delay the execution
 
-    ldr r0, =red_LED
-    ldr r0, [r0]
-    mov r1, #ON
-    bl digitalWrite
+    ldr r0, =red_LED @ Load the red_LED into r0
+    ldr r0, [r0] @ Load the value of red_LED into r0
+    mov r1, #ON @ Set r1 equal to ON
+    bl digitalWrite @ Call digitalWrite to turn on the red LED
 
-    ldr r0, =delayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =delayMs @ Load the delayMs into r0
+    ldr r0, [r0] @ Load the value of delayMs into r0
+    bl delay @ Call delay to delay the execution
 
-    ldr r0, =red_LED
-    ldr r0, [r0]
-    mov r1, #OFF
-    bl digitalWrite
+    ldr r0, =red_LED @ Load the red_LED into r0
+    ldr r0, [r0] @ Load the value of red_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the red LED
 
-    ldr r0, =delayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =delayMs @ Load the delayMs into r0
+    ldr r0, [r0] @ Load the value of delayMs into r0
+    bl delay @ Call delay to delay the execution
 
-    ldr r0, =red_LED
-    ldr r0, [r0]
-    mov r1, #ON
-    bl digitalWrite
+    ldr r0, =red_LED @ Load the red_LED into r0
+    ldr r0, [r0] @ Load the value of red_LED into r0
+    mov r1, #ON @ Set r1 equal to ON
+    bl digitalWrite @ Call digitalWrite to turn on the red LED
 
-    ldr r0, =delayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =delayMs @ Load the delayMs into r0
+    ldr r0, [r0] @ Load the value of delayMs into r0
+    bl delay @ Call delay to delay the execution
 
     pop {pc} @ Exit the subroutine
 
-@ This label ends the program 
+@ This label ends the program and shuts off all the LEDs
 @**********
 exit:
 @**********
 
-    ldr r0, =red_LED
-    ldr r0, [r0]
-    mov r1, #OFF
-    bl digitalWrite
+    ldr r0, =red_LED @ Load the red_LED into r0
+    ldr r0, [r0] @ Load the value of red_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the red LED
+
+    ldr r0, =blue_LED @ Load the blue_LED into r0
+    ldr r0, [r0] @ Load the value of blue_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the blue LED
+
+    ldr r0, =yellow_LED @ Load the yellow_LED into r0
+    ldr r0, [r0] @ Load the value of yellow_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the yellow LED
+
+    ldr r0, =green_LED @ Load the green_LED into r0
+    ldr r0, [r0] @ Load the value of green_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl  digitalWrite @ Call digitalWrite to turn off the green LED
 
 	mov r7, #0x01 @ Set r7 equal to 0x01
 	svc 0 @ Call svc 0 to exit the program
@@ -313,19 +333,21 @@ brewSmall:
 @**********
 
     push {lr} @ Push the link register to the stack
-    ldr r0, =yellow_LED
-    ldr r0, [r0]
-    mov r1, #ON
-    bl digitalWrite
 
-    ldr r0, =smallDelayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =yellow_LED @ Load the yellow_LED into r0
+    ldr r0, [r0] @ Load the value of yellow_LED into r0
+    mov r1, #ON @ Set r1 equal to ON
+    bl digitalWrite @ Call digitalWrite to turn on the yellow LED
 
-    ldr r0, =yellow_LED
-    ldr r0, [r0]
-    mov r1, #OFF
-    bl digitalWrite
+    ldr r0, =smallDelayMs @ Load the smallDelayMs into r0
+    ldr r0, [r0] @ Load the value of smallDelayMs into r0
+    bl delay @ Call delay to delay the execution
+
+    ldr r0, =yellow_LED @ Load the yellow_LED into r0
+    ldr r0, [r0] @ Load the value of yellow_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the yellow LED
+
     pop {pc} @ Exit the subroutine
 
 @ This subroutine is for turning the green LED on and off
@@ -334,40 +356,45 @@ brewMedium:
 @**********
 
     push {lr} @ Push the link register to the stack
-    ldr r0, =green_LED
-    ldr r0, [r0]
-    mov r1, #ON
-    bl digitalWrite
 
-    ldr r0, =mediumDelayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =green_LED @ Load the green_LED into r0
+    ldr r0, [r0] @ Load the value of green_LED into r0
+    mov r1, #ON @ Set r1 equal to ON
+    bl digitalWrite @ Call digitalWrite to turn on the green LED
 
-    ldr r0, =green_LED
-    ldr r0, [r0]
-    mov r1, #OFF
-    bl digitalWrite
+    ldr r0, =mediumDelayMs @ Load the mediumDelayMs into r0
+    ldr r0, [r0] @ Load the value of mediumDelayMs into r0
+    bl delay @ Call delay to delay the execution
+
+    ldr r0, =green_LED @ Load the green_LED into r0
+    ldr r0, [r0] @ Load the value of green_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the green LED
+
     pop {pc} @ Exit the subroutine
 
+    
 @ This subroutine is for turning the blue LED on and off
 @**********
 brewLarge:
 @**********
 
     push {lr} @ Push the link register to the stack
-    ldr r0, =blue_LED
-    ldr r0, [r0]
-    mov r1, #ON
-    bl digitalWrite
 
-    ldr r0, =largeDelayMs
-    ldr r0, [r0]
-    bl delay
+    ldr r0, =blue_LED @ Load the address of blue_LED into r0
+    ldr r0, [r0] @ Load the value of blue_LED into r0
+    mov r1, #ON @ Set r1 equal to ON
+    bl digitalWrite @ Call digitalWrite to turn on the blue LED
 
-    ldr r0, =blue_LED
-    ldr r0, [r0]
-    mov r1, #OFF
-    bl digitalWrite
+    ldr r0, =largeDelayMs @ Load the address of largeDelayMs into r0
+    ldr r0, [r0] @ Load the value of largeDelayMs into r0
+    bl delay @ Call delay to delay the execution
+
+    ldr r0, =blue_LED @ Load the address of blue_LED into r0
+    ldr r0, [r0] @ Load the value of blue_LED into r0
+    mov r1, #OFF @ Set r1 equal to OFF
+    bl digitalWrite @ Call digitalWrite to turn off the blue LED
+    
     pop {pc} @ Exit the subroutine
 
 .data 
